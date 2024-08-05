@@ -4,27 +4,31 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.sandro.sdoku.R
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var gridLayout: GridLayout
+    private lateinit var gameBoard: GridLayout
     private val sudokuGrid = Array(9) { Array(9) { 0 } }
     private var selectedCell: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        gridLayout = findViewById(R.id.gridLayout)
-        generateSudoku()
+        initClearButton()
+        initNumberButtons()
+        gameBoard = findViewById(R.id.gameBoard)
+        initializeSudokuGrid() // 게임판 초기화
         displaySudoku()
+    }
 
-        // 숫자 버튼에 클릭 리스너 추가
+    private fun initNumberButtons() {
         val numberButtons = findViewById<GridLayout>(R.id.numberButtons)
 
         for (i in 0 until numberButtons.childCount) {
@@ -33,30 +37,30 @@ class MainActivity : AppCompatActivity() {
                 selectedCell?.setText(button.text)
             }
         }
+    }
 
-        // onCreate() 메서드 내에서
+    private fun initClearButton() {
         val clearButton = findViewById<Button>(R.id.clearButton)
 
         clearButton.setOnClickListener {
-            selectedCell?.setText("") // 현재 선택된 셀의 내용 지우기
+            selectedCell?.text = null // 현재 선택된 셀의 내용 지우기
         }
     }
 
-    private fun generateSudoku() {
-        // 스도쿠 퍼즐을 생성하는 로직을 추가합니다.
-        // 여기서는 간단한 예제로 기본 값을 설정합니다.
-        sudokuGrid[0] = arrayOf(5, 3, 0, 0, 7, 0, 0, 0, 0)
-        sudokuGrid[1] = arrayOf(6, 0, 0, 1, 9, 5, 0, 0, 0)
-        sudokuGrid[2] = arrayOf(0, 9, 8, 0, 0, 0, 0, 6, 0)
-        sudokuGrid[3] = arrayOf(8, 0, 0, 0, 6, 0, 0, 0, 3)
-        sudokuGrid[4] = arrayOf(4, 0, 0, 8, 0, 3, 0, 0, 1)
-        sudokuGrid[5] = arrayOf(7, 0, 0, 0, 2, 0, 0, 0, 6)
-        sudokuGrid[6] = arrayOf(0, 6, 0, 0, 0, 0, 2, 8, 0)
-        sudokuGrid[7] = arrayOf(0, 0, 0, 4, 1, 9, 0, 0, 5)
-        sudokuGrid[8] = arrayOf(0, 0, 0, 0, 8, 0, 0, 7, 9)
+    private fun initializeSudokuGrid() {
+        val random = Random
+
+        for (i in 0 until 9) {
+            for (j in 0 until 9) {
+                // 1부터 9까지의 랜덤 숫자 생성
+                sudokuGrid[i][j] = random.nextInt(1, 10) // 1~9 사이의 숫자
+            }
+        }
     }
 
     private fun displaySudoku() {
+        gameBoard.removeAllViews() // 기존 뷰 제거
+
         for (i in 0 until 9) {
             for (j in 0 until 9) {
                 val textView = TextView(this)
@@ -79,10 +83,39 @@ class MainActivity : AppCompatActivity() {
                     selectedCell?.setBackgroundResource(R.drawable.selected_cell_background) // 선택된 셀 강조
                 }
 
-                gridLayout.addView(textView)
+                gameBoard.addView(textView)
+
+                generateVerticalLine(j)
             }
+            generateHorizontalLine(i)
         }
     }
 
+    private fun generateHorizontalLine(i: Int) {
+//        if (i == 2 || i == 5) {
+//            val horizontalLine = View(this)
+//            horizontalLine.layoutParams = GridLayout.LayoutParams().apply {
+//                width = GridLayout.LayoutParams.MATCH_PARENT
+//                height = 2 // 경계선 두께
+//                rowSpec = GridLayout.spec(i + 1) // 경계선 위치
+//                columnSpec = GridLayout.spec(0, 9) // 전체 너비
+//            }
+//            horizontalLine.setBackgroundColor(Color.BLACK) // 경계선 색상
+//            gameBoard.addView(horizontalLine)
+//        }
+    }
 
+    private fun generateVerticalLine(j: Int) {
+//        if (j == 2 || j == 5) {
+//            val verticalLine = View(this)
+//            verticalLine.layoutParams = GridLayout.LayoutParams().apply {
+//                width = 2 // 경계선 두께
+//                height = GridLayout.LayoutParams.MATCH_PARENT
+//                rowSpec = GridLayout.spec(0, 9) // 전체 높이
+//                columnSpec = GridLayout.spec(j + 1) // 경계선 위치
+//            }
+//            verticalLine.setBackgroundColor(Color.BLACK) // 경계선 색상
+//            gameBoard.addView(verticalLine)
+//        }
+    }
 }
