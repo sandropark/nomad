@@ -1,4 +1,4 @@
-package com.example.prac_app
+package com.sandro.prac_app
 
 import org.junit.Test
 
