@@ -14,15 +14,7 @@ class MainActivity : AppCompatActivity() {
         val btn: Button = findViewById(R.id.btn_kr)
 
         btn.setOnClickListener {
-            if (btn.text == "한글로") {
-                tv.text = "안녕"
-                btn.text = "영어로"
-            }
-
-            if (btn.text == "영어로") {
-                tv.text = "Hello"
-                btn.text = "한글로"
-            }
+            tv.text = "안녕"
         }
     }
 }
