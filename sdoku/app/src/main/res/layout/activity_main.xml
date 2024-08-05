@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="3"
-        android:rowCount="4">
+        android:rowCount="3">
 
         <Button style="@style/NumberButtonStyle" android:text="1" />
         <Button style="@style/NumberButtonStyle" android:text="2" />
@@ -30,7 +30,13 @@
         <Button style="@style/NumberButtonStyle" android:text="7" />
         <Button style="@style/NumberButtonStyle" android:text="8" />
         <Button style="@style/NumberButtonStyle" android:text="9" />
-        <Button style="@style/NumberButtonStyle" android:text="0" />
     </GridLayout>
+
+    <Button
+        android:id="@+id/clearButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="지우개"
+        android:textSize="10sp" />
 
 </LinearLayout>

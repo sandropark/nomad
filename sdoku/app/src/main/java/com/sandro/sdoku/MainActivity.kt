@@ -2,10 +2,11 @@ package com.example.sudoku
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Gravity
 import android.widget.Button
-import android.widget.EditText
 import android.widget.GridLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.sandro.sdoku.R
 
@@ -13,7 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var gridLayout: GridLayout
     private val sudokuGrid = Array(9) { Array(9) { 0 } }
-    private var selectedCell: EditText? = null
+    private var selectedCell: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,13 @@ class MainActivity : AppCompatActivity() {
             button.setOnClickListener {
                 selectedCell?.setText(button.text)
             }
+        }
+
+        // onCreate() 메서드 내에서
+        val clearButton = findViewById<Button>(R.id.clearButton)
+
+        clearButton.setOnClickListener {
+            selectedCell?.setText("") // 현재 선택된 셀의 내용 지우기
         }
     }
 
@@ -51,29 +59,27 @@ class MainActivity : AppCompatActivity() {
     private fun displaySudoku() {
         for (i in 0 until 9) {
             for (j in 0 until 9) {
-                val editText = EditText(this)
-                editText.layoutParams = GridLayout.LayoutParams().apply {
+                val textView = TextView(this)
+                textView.layoutParams = GridLayout.LayoutParams().apply {
                     width = 0
                     height = 0
                     columnSpec = GridLayout.spec(j, 1f)
                     rowSpec = GridLayout.spec(i, 1f)
                 }
-                editText.setText(if (sudokuGrid[i][j] != 0) sudokuGrid[i][j].toString() else "")
-                editText.inputType = android.text.InputType.TYPE_CLASS_NUMBER
-                editText.setPadding(8, 8, 8, 8)
-                editText.gravity = Gravity.CENTER
-                editText.textSize = 24f
-                editText.setTextColor(Color.BLACK) // 텍스트 색상 추가
-                editText.setBackgroundResource(R.drawable.cell_background)
+                textView.text = if (sudokuGrid[i][j] != 0) sudokuGrid[i][j].toString() else ""
+                textView.gravity = Gravity.CENTER
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                textView.setTextColor(Color.BLACK)
+                textView.setBackgroundResource(R.drawable.cell_background)
 
                 // 클릭 리스너 추가
-                editText.setOnClickListener {
+                textView.setOnClickListener {
                     selectedCell?.setBackgroundResource(R.drawable.cell_background)
-                    selectedCell = editText
+                    selectedCell = textView
                     selectedCell?.setBackgroundResource(R.drawable.selected_cell_background) // 선택된 셀 강조
                 }
 
-                gridLayout.addView(editText)
+                gridLayout.addView(textView)
             }
         }
     }
