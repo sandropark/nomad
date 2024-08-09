@@ -12,50 +12,72 @@ import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tvTimer: TextView;
-    private var isRunning = false
+    private lateinit var tvGoal: TextView;
+    private lateinit var btn: Button
     private var timerTask: Timer? = null
+    private var stage = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val btn: Button = findViewById(R.id.btn_command)
-        tvTimer = findViewById(R.id.tv_timer)
-        val goal = initGoal()
+        main()
+    }
 
+    private fun main() {
+        setContentView(R.layout.activity_main)
+        tvGoal = findViewById(R.id.tv_goal)
+        tvTimer = findViewById(R.id.tv_timer)
+        btn = findViewById(R.id.btn_command)
+        initGoal()
+        setButtonOnClickListener()
+    }
+
+    private fun setButtonOnClickListener() {
         btn.setOnClickListener {
-            isRunning = !isRunning
-            if (isRunning) {
-                startTimer()
-                btn.text = "Stop"
-            } else {
-                timerTask?.cancel()
-                btn.text = "Start"
-                lenderScore(goal)
+            stage++
+
+            when (stage % 3) {
+                0 -> main()
+
+                1 -> {
+                    start()
+                    btn.text = "Stop"
+                }
+
+                2 -> {
+                    stop()
+                    lenderScore()
+                }
             }
         }
     }
 
-    @SuppressLint("DefaultLocale", "SetTextI18n")
-    private fun lenderScore(goal: Float) {
-        val tvScore: TextView = findViewById(R.id.tv_score)
-        tvScore.text =
-            "score: " + String.format("%.2f", abs(goal - tvTimer.text.toString().toFloat()))
-    }
-
-    private fun initGoal(): Float {
-        val tvGoal: TextView = findViewById(R.id.tv_goal)
+    private fun initGoal() {
         val goal = Random().nextInt(1001) / 100f
         tvGoal.text = goal.toString()
-        return goal
     }
 
-    private fun startTimer() {
-        var sec: Float = 0f
+    private fun start() {
+        var sec = 0f
         timerTask = timer(period = 10) {
             runOnUiThread { // UI 변경은 runOnUiThread로 처리
                 sec++
                 tvTimer.text = (sec / 100).toString()
             }
         }
+    }
+
+    private fun stop() {
+        timerTask?.cancel()
+        btn.text = "Next"
+    }
+
+    @SuppressLint("DefaultLocale", "SetTextI18n")
+    private fun lenderScore() {
+        val tvScore: TextView = findViewById(R.id.tv_score)
+        tvScore.text =
+            "score: " + String.format(
+                "%.2f",
+                abs(tvGoal.text.toString().toFloat() - tvTimer.text.toString().toFloat())
+            )
     }
 }
