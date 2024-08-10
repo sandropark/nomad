@@ -15,7 +15,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvGoal: TextView;
     private lateinit var btn: Button
     private var timerTask: Timer? = null
-    private var stage = 0
+    private var stage = 1
+    private var k = 1
+    private val scores: MutableList<Float> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,25 +29,35 @@ class MainActivity : AppCompatActivity() {
         tvGoal = findViewById(R.id.tv_goal)
         tvTimer = findViewById(R.id.tv_timer)
         btn = findViewById(R.id.btn_command)
+        val tvPeople: TextView = findViewById(R.id.tv_people)
+        tvPeople.text = "참가자 $k"
         initGoal()
         setButtonOnClickListener()
     }
 
     private fun setButtonOnClickListener() {
         btn.setOnClickListener {
-            stage++
-
             when (stage % 3) {
-                0 -> main()
+                0 -> {
+                    if (k < 3) {
+                        k++
+                        main()
+                        stage++
+                    } else {
+                        println(scores)
+                    }
+                }
 
                 1 -> {
                     start()
                     btn.text = "Stop"
+                    stage++
                 }
 
                 2 -> {
                     stop()
                     lenderScore()
+                    stage++
                 }
             }
         }
@@ -74,10 +86,8 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("DefaultLocale", "SetTextI18n")
     private fun lenderScore() {
         val tvScore: TextView = findViewById(R.id.tv_score)
-        tvScore.text =
-            "score: " + String.format(
-                "%.2f",
-                abs(tvGoal.text.toString().toFloat() - tvTimer.text.toString().toFloat())
-            )
+        val score = abs(tvGoal.text.toString().toFloat() - tvTimer.text.toString().toFloat())
+        scores.add(score)
+        tvScore.text = "score: ${String.format("%.2f", score)}"
     }
 }
