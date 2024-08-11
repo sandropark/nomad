@@ -16,12 +16,33 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btn: Button
     private var timerTask: Timer? = null
     private var stage = 1
-    private var k = 1
+    private var people = 1
+    private var k = 2
     private val scores: MutableList<Float> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        main()
+        startView()
+    }
+
+    private fun startView() {
+        setContentView(R.layout.activity_main_start)
+        val tvCount: TextView = findViewById(R.id.tv_count)
+        findViewById<Button>(R.id.btn_minus).setOnClickListener {
+            if (k > 1) {
+                k--
+                tvCount.text =k.toString()
+            }
+        }
+        findViewById<Button>(R.id.btn_plus).setOnClickListener {
+            if (k < 99) {
+                k++
+                tvCount.text = k.toString()
+            }
+        }
+        findViewById<Button>(R.id.btn_start).setOnClickListener {
+            main()
+        }
     }
 
     private fun main() {
@@ -39,8 +60,8 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (k < 3) {
-                        k++
+                    if (people < k) {
+                        people++
                         main()
                         stage++
                     } else {
