@@ -11,14 +11,13 @@ import kotlin.concurrent.timer
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var tvTimer: TextView;
-    private lateinit var tvGoal: TextView;
+    private lateinit var tvTimer: TextView
+    private lateinit var tvGoal: TextView
     private lateinit var btn: Button
     private var timerTask: Timer? = null
-    private var stage = 1
-    private var people = 1
-    private var k = 2
+    private var totalPeople = 1
     private val scores: MutableList<Float> = mutableListOf()
+    private var people = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,21 +25,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startView() {
-        setContentView(R.layout.activity_main_start)
+        setContentView(R.layout.activity_start)
         val tvCount: TextView = findViewById(R.id.tv_count)
         findViewById<Button>(R.id.btn_minus).setOnClickListener {
-            if (k > 1) {
-                k--
-                tvCount.text =k.toString()
+            if (totalPeople > 1) {
+                totalPeople--
+                tvCount.text = totalPeople.toString()
             }
         }
         findViewById<Button>(R.id.btn_plus).setOnClickListener {
-            if (k < 99) {
-                k++
-                tvCount.text = k.toString()
+            if (totalPeople < 99) {
+                totalPeople++
+                tvCount.text = totalPeople.toString()
             }
         }
         findViewById<Button>(R.id.btn_start).setOnClickListener {
+            people = 1
             main()
         }
     }
@@ -50,22 +50,33 @@ class MainActivity : AppCompatActivity() {
         tvGoal = findViewById(R.id.tv_goal)
         tvTimer = findViewById(R.id.tv_timer)
         btn = findViewById(R.id.btn_command)
-        val tvPeople: TextView = findViewById(R.id.tv_people)
-        tvPeople.text = "참가자 $k"
+        findViewById<TextView>(R.id.tv_people).text = "참가자 $people"
         initGoal()
         setButtonOnClickListener()
     }
 
+    private fun endView() {
+        setContentView(R.layout.activity_end)
+        val maxScore = scores.max()
+        findViewById<TextView>(R.id.tv_biggest_score).text = maxScore.toString()
+        findViewById<TextView>(R.id.tv_end_people).text = "참가자 ${scores.indexOf(maxScore) + 1}"
+        findViewById<Button>(R.id.btn_restart).setOnClickListener {
+            scores.clear()
+            startView()
+        }
+    }
+
     private fun setButtonOnClickListener() {
+        var stage = 1
         btn.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (people < k) {
+                    if (people <= totalPeople) {
                         people++
                         main()
                         stage++
                     } else {
-                        println(scores)
+                        endView()
                     }
                 }
 
