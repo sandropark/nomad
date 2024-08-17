@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         var list = mutableListOf("Scope", "Function")
-        list.run {
-            val listSize = size
+        list.let {
+            val listSize = it.size
             println("리스트의 길이 run = $listSize")
         }
     }
