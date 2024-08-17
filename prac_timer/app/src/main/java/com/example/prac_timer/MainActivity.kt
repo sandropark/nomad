@@ -11,11 +11,12 @@ import kotlin.concurrent.timer
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var startView: StartView
     private lateinit var tvTimer: TextView
     private lateinit var tvGoal: TextView
     private lateinit var btn: Button
+
     private var timerTask: Timer? = null
-    private var totalPeople = 1
     private val scores: MutableList<Float> = mutableListOf()
     private var people = 1
 
@@ -26,20 +27,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun startView() {
         setContentView(R.layout.activity_start)
-        val tvCount: TextView = findViewById(R.id.tv_count)
-        findViewById<Button>(R.id.btn_minus).setOnClickListener {
-            if (totalPeople > 1) {
-                totalPeople--
-                tvCount.text = totalPeople.toString()
-            }
-        }
-        findViewById<Button>(R.id.btn_plus).setOnClickListener {
-            if (totalPeople < 99) {
-                totalPeople++
-                tvCount.text = totalPeople.toString()
-            }
-        }
-        findViewById<Button>(R.id.btn_start).setOnClickListener {
+        startView = StartView(
+            findViewById(R.id.tv_count),
+            findViewById(R.id.btn_minus),
+            findViewById(R.id.btn_plus),
+            findViewById(R.id.btn_start),
+            2
+        )
+        startView.setOnclickListenerOnBtnStart {
             people = 1
             main()
         }
@@ -47,9 +42,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun main() {
         setContentView(R.layout.activity_main)
-        tvGoal = findViewById(R.id.tv_goal)
-        tvTimer = findViewById(R.id.tv_timer)
+        tvTimer = findViewById(R.id.tv_goal)
+        tvGoal = findViewById(R.id.tv_timer)
         btn = findViewById(R.id.btn_command)
+
         findViewById<TextView>(R.id.tv_people).text = "참가자 $people"
         initGoal()
         setButtonOnClickListener()
@@ -71,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         btn.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (people <= totalPeople) {
+                    if (startView.isTotalPeopleBiggerThan(people)) {
                         people++
                         main()
                         stage++
