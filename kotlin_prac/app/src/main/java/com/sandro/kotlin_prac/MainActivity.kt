@@ -16,17 +16,6 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        var list = mutableListOf("Scope", "Function")
-        list.apply {
-            val listSize = size
-            println("리스트의 길이 run = $listSize")
-        }
-
-        with(list) {
-            val listSize = size
-            println("리스트의 길이 run = $listSize")
-        }
     }
 
 }

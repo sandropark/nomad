@@ -1,17 +1,16 @@
 package com.sandro.kotlin_prac
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
-import org.junit.Assert.*
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun 람다() {
+        val result = b { str -> "$str 람다함수" }
+        assertEquals("b가 호출한 람다함수", result)
+    }
+
+    private fun b(function: (String) -> String): String {
+        return function("b가 호출한")
     }
 }
