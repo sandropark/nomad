@@ -2,7 +2,7 @@ package com.example.prac_timer
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import com.example.prac_timer.databinding.ActivityEndBinding
 import com.example.prac_timer.databinding.ActivityMainBinding
 import com.example.prac_timer.databinding.ActivityStartBinding
@@ -16,27 +16,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainBinding: ActivityMainBinding
     private lateinit var endBinding: ActivityEndBinding
 
+    private lateinit var startViewModel: StartViewModel
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var endViewModel: EndViewModel
+
     private var timerTask: Timer? = null
     private val scores: MutableList<Float> = mutableListOf()
     private var people = 1
     private var isBlind = true
     private var tempScore: Float = 0.0f
-
     private var stage = 1
-
-    // startView
-    private val liveDataTotalPeople = MutableLiveData<Int>().apply { value = 2 }
-
-    // mainView
-    private val liveDataMainButton = MutableLiveData<String>().apply { value = "Start" }
-    private val liveDataScore = MutableLiveData<String>().apply { value = "" }
-    private val liveDataTimer = MutableLiveData<String>().apply { value = "0.00" }
-    private val liveDataPeople = MutableLiveData<String>()
-    private val liveDataGoal = MutableLiveData<Float>()
-
-    // endView
-    private val liveDataBiggestScore = MutableLiveData<Float>()
-    private val liveDataEndPeople = MutableLiveData<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,22 +33,13 @@ class MainActivity : AppCompatActivity() {
         mainBinding = ActivityMainBinding.inflate(layoutInflater)
         endBinding = ActivityEndBinding.inflate(layoutInflater)
 
-        // startView
         initStartView()
+        initMainView()
+        initEndView()
+    }
 
-        // mainView
-        setMainButtonOnClickListener()
-        liveDataMainButton.observe(this) { mainBinding.buttonText = it }
-        liveDataScore.observe(this) { mainBinding.score = it }
-        liveDataTimer.observe(this) { mainBinding.timer = it }
-        liveDataPeople.observe(this) { mainBinding.people = it }
-        liveDataGoal.observe(this) { mainBinding.goal = it.toString() }
-
-        // endView
-        liveDataBiggestScore.observe(this) { endBinding.biggestScore = it.toString() }
-        liveDataEndPeople.observe(this) { endBinding.endPeople = it }
-        setRestartBtnOnclickListener()
-
+    override fun onStart() {
+        super.onStart()
         startView()
     }
 
@@ -69,50 +49,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initStartView() {
-        setOnclickListenerOnBtnMinus()
-        setOnclickListenerOnBtnPlus()
-        setStartBtnOnclickListener()
-        liveDataTotalPeople.observe(this) {
-            startBinding.totalPeople = it.toString()
-        }
-    }
-
-    private fun setStartBtnOnclickListener() {
+        startViewModel = ViewModelProvider(this)[StartViewModel::class.java]
+        startBinding.btnMinus.setOnClickListener { startViewModel.minus() }
+        startBinding.btnPlus.setOnClickListener { startViewModel.plus() }
         startBinding.btnStart.setOnClickListener {
             people = 1
             mainView()
         }
-    }
-
-    private fun setOnclickListenerOnBtnMinus() {
-        startBinding.btnMinus.setOnClickListener {
-            liveDataTotalPeople.value?.let { totalPeople ->
-                if (totalPeople > 1) {
-                    liveDataTotalPeople.value = totalPeople - 1
-                }
-            }
-        }
-    }
-
-    private fun setOnclickListenerOnBtnPlus() {
-        startBinding.btnPlus.setOnClickListener {
-            liveDataTotalPeople.value?.let { totalPeople ->
-                if (totalPeople < 99) {
-                    liveDataTotalPeople.value = totalPeople + 1
-                }
-            }
-        }
+        startViewModel.liveDataTotalPeople.observe(this) { startBinding.totalPeople = it.toString() }
     }
 
     // mainView
+    private fun initMainView() {
+        setMainButtonOnClickListener()
+        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        mainViewModel.mainButton.observe(this) { mainBinding.buttonText = it }
+        mainViewModel.score.observe(this) { mainBinding.score = it.toString() }
+        mainViewModel.timer.observe(this) { mainBinding.timer = it }
+        mainViewModel.people.observe(this) { mainBinding.people = it }
+        mainViewModel.goal.observe(this) { mainBinding.goal = it.toString() }
+    }
+
     private fun mainView() {
         setContentView(mainBinding.root)
-
-        liveDataMainButton.value = "Start"
-        liveDataPeople.value = "참가자 $people"
-        liveDataScore.value = ""
-        liveDataTimer.value = "0.00"
-        liveDataGoal.value = Random().nextInt(1001) / 100f
+        mainViewModel.mainButton.value = "Start"
+        mainViewModel.people.value = "참가자 $people"
+        mainViewModel.score.value = ""
+        mainViewModel.timer.value = "0.00"
+        mainViewModel.goal.value = Random().nextInt(1001) / 100f
         stage = 1
     }
 
@@ -120,10 +84,9 @@ class MainActivity : AppCompatActivity() {
         mainBinding.btnCommand.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (people < liveDataTotalPeople.value!!) {
+                    if (people < startViewModel.liveDataTotalPeople.value!!) {
                         people++
                         mainView()
-                        stage++
                     } else {
                         endView()
                     }
@@ -131,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
                 1 -> {
                     start()
-                    liveDataMainButton.value = "Stop"
+                    mainViewModel.mainButton.value = "Stop"
                     stage++
                 }
 
@@ -150,9 +113,9 @@ class MainActivity : AppCompatActivity() {
                 sec++
                 tempScore = (sec / 100)
                 if (isBlind) {
-                    liveDataTimer.value = "???"
+                    mainViewModel.timer.value = "???"
                 } else {
-                    liveDataTimer.value = tempScore.toString()
+                    mainViewModel.timer.value = tempScore.toString()
                 }
             }
         }
@@ -160,27 +123,30 @@ class MainActivity : AppCompatActivity() {
 
     private fun stop() {
         timerTask?.cancel()
-        liveDataMainButton.value = "Next"
+        mainViewModel.mainButton.value = "Next"
 
-        val score = abs(liveDataGoal.value!! - tempScore)
+        val score = abs(mainViewModel.goal.value!! - tempScore)
         scores.add(score)
 
         mainBinding.score = "score: ${String.format("%.2f", score)}"
     }
 
     // endView
-    private fun endView() {
-        setContentView(endBinding.root)
-        val maxScore = scores.max()
-        liveDataBiggestScore.value = maxScore
-        liveDataEndPeople.value = "참가자 ${scores.indexOf(maxScore) + 1}"
-    }
-
-
-    private fun setRestartBtnOnclickListener() {
+    private fun initEndView() {
+        endViewModel = ViewModelProvider(this)[EndViewModel::class.java]
+        endViewModel.liveDataBiggestScore.observe(this) { endBinding.biggestScore = it.toString() }
+        endViewModel.liveDataEndPeople.observe(this) { endBinding.endPeople = it }
         endBinding.btnRestart.setOnClickListener {
             scores.clear()
             startView()
         }
     }
+
+    private fun endView() {
+        setContentView(endBinding.root)
+        val maxScore = scores.max()
+        endViewModel.liveDataBiggestScore.value = maxScore
+        endViewModel.liveDataEndPeople.value = "참가자 ${scores.indexOf(maxScore) + 1}"
+    }
+
 }
