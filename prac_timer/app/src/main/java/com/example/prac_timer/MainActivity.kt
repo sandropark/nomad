@@ -1,9 +1,11 @@
 package com.example.prac_timer
 
 import android.os.Bundle
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.prac_timer.databinding.ActivityEndBinding
+import com.example.prac_timer.databinding.ActivityMainBinding
+import com.example.prac_timer.databinding.ActivityStartBinding
 import java.util.Random
 import java.util.Timer
 import kotlin.concurrent.timer
@@ -11,9 +13,7 @@ import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
     private lateinit var startView: StartView
-    private lateinit var tvTimer: TextView
-    private lateinit var tvGoal: TextView
-    private lateinit var btn: Button
+    private lateinit var mainBinding: ActivityMainBinding
 
     private var timerTask: Timer? = null
     private val scores: MutableList<Float> = mutableListOf()
@@ -28,14 +28,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startView() {
-        setContentView(R.layout.activity_start)
-        startView = StartView(
-            findViewById(R.id.tv_count),
-            findViewById(R.id.btn_minus),
-            findViewById(R.id.btn_plus),
-            findViewById(R.id.btn_start),
-            2
-        )
+        val startBinding = ActivityStartBinding.inflate(layoutInflater)
+        setContentView(startBinding.root)
+        startView = StartView(startBinding, 2)
         startView.setOnclickListenerOnBtnStart {
             people = 1
             main()
@@ -43,22 +38,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun main() {
-        setContentView(R.layout.activity_main)
-        tvTimer = findViewById(R.id.tv_timer)
-        tvGoal = findViewById(R.id.tv_goal)
-        btn = findViewById(R.id.btn_command)
-
-        findViewById<TextView>(R.id.tv_people).text = "참가자 $people"
+        mainBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(mainBinding.root)
+        mainBinding.tvPeople.text = "참가자 $people"
         initGoal()
         setButtonOnClickListener()
     }
 
     private fun endView() {
-        setContentView(R.layout.activity_end)
+        val endBinding = ActivityEndBinding.inflate(layoutInflater)
+        setContentView(endBinding.root)
         val maxScore = scores.max()
-        findViewById<TextView>(R.id.tv_biggest_score).text = maxScore.toString()
-        findViewById<TextView>(R.id.tv_end_people).text = "참가자 ${scores.indexOf(maxScore) + 1}"
-        findViewById<Button>(R.id.btn_restart).setOnClickListener {
+        endBinding.tvBiggestScore.text = maxScore.toString()
+        endBinding.tvEndPeople.text = "참가자 ${scores.indexOf(maxScore) + 1}"
+        endBinding.btnRestart.setOnClickListener {
             scores.clear()
             startView()
         }
@@ -66,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setButtonOnClickListener() {
         var stage = 1
-        btn.setOnClickListener {
+        mainBinding.btnCommand.setOnClickListener {
             when (stage % 3) {
                 0 -> {
                     if (startView.isTotalPeopleBiggerThan(people)) {
@@ -80,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
                 1 -> {
                     start()
-                    btn.text = "Stop"
+                    mainBinding.btnCommand.text = "Stop"
                     stage++
                 }
 
@@ -94,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initGoal() {
         goal = Random().nextInt(1001) / 100f
-        tvGoal.text = goal.toString()
+        mainBinding.tvGoal.text = goal.toString()
     }
 
     private fun start() {
@@ -104,9 +97,9 @@ class MainActivity : AppCompatActivity() {
                 sec++
                 tempScore = (sec / 100)
                 if (isBlind) {
-                    tvTimer.text = "???"
+                    mainBinding.tvTimer.text = "???"
                 } else {
-                    tvTimer.text = tempScore.toString()
+                    mainBinding.tvTimer.text = tempScore.toString()
                 }
             }
         }
@@ -114,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun stop() {
         timerTask?.cancel()
-        btn.text = "Next"
+        mainBinding.btnCommand.text = "Next"
 
         val score = abs(goal - tempScore)
         scores.add(score)

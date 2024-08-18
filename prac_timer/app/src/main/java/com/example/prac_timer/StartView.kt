@@ -1,13 +1,9 @@
 package com.example.prac_timer
 
-import android.widget.Button
-import android.widget.TextView
+import com.example.prac_timer.databinding.ActivityStartBinding
 
 class StartView(
-    private val tvCount: TextView,
-    private val btnMinus: Button,
-    private val btnPlus: Button,
-    private val btnStart: Button,
+    private val binding: ActivityStartBinding,
     private var totalPeople: Int
 ) {
     init {
@@ -17,31 +13,31 @@ class StartView(
     }
 
     private fun setOnclickListenerOnBtnMinus() {
-        btnMinus.setOnClickListener {
+        binding.btnMinus.setOnClickListener {
             if (totalPeople > 1) {
                 totalPeople--
-                tvCount.text = totalPeople.toString()
+                binding.tvCount.text = totalPeople.toString()
             }
         }
     }
 
     private fun setOnclickListenerOnBtnPlus() {
-        btnPlus.setOnClickListener {
+        binding.btnPlus.setOnClickListener {
             if (totalPeople < 99) {
                 totalPeople++
-                tvCount.text = totalPeople.toString()
+                binding.tvCount.text = totalPeople.toString()
             }
         }
     }
 
     fun setOnclickListenerOnBtnStart(function: () -> Unit) {
-        btnStart.setOnClickListener {
+        binding.btnStart.setOnClickListener {
             function()
         }
     }
 
     private fun renderCount() {
-        tvCount.text = totalPeople.toString()
+        binding.tvCount.text = totalPeople.toString()
     }
 
     fun isTotalPeopleBiggerThan(people: Int): Boolean {
