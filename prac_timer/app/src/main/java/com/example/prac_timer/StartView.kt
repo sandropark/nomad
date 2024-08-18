@@ -4,10 +4,11 @@ import com.example.prac_timer.databinding.ActivityStartBinding
 
 class StartView(
     private val binding: ActivityStartBinding,
-    private var totalPeople: Int
 ) {
+    private var totalPeople: Int = 2
+
     init {
-        renderCount()
+        updateTotalPeopleUi()
         setOnclickListenerOnBtnMinus()
         setOnclickListenerOnBtnPlus()
     }
@@ -16,7 +17,7 @@ class StartView(
         binding.btnMinus.setOnClickListener {
             if (totalPeople > 1) {
                 totalPeople--
-                binding.tvCount.text = totalPeople.toString()
+                updateTotalPeopleUi()
             }
         }
     }
@@ -25,7 +26,7 @@ class StartView(
         binding.btnPlus.setOnClickListener {
             if (totalPeople < 99) {
                 totalPeople++
-                binding.tvCount.text = totalPeople.toString()
+                updateTotalPeopleUi()
             }
         }
     }
@@ -36,8 +37,8 @@ class StartView(
         }
     }
 
-    private fun renderCount() {
-        binding.tvCount.text = totalPeople.toString()
+    private fun updateTotalPeopleUi() {
+        binding.totalPeople = totalPeople.toString()
     }
 
     fun isTotalPeopleBiggerThan(people: Int): Boolean {

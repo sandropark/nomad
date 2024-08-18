@@ -1,7 +1,6 @@
 package com.example.prac_timer
 
 import android.os.Bundle
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.prac_timer.databinding.ActivityEndBinding
 import com.example.prac_timer.databinding.ActivityMainBinding
@@ -22,15 +21,26 @@ class MainActivity : AppCompatActivity() {
     private var tempScore: Float = 0.0f
     private var goal: Float = 0.0f
 
+    private var mainButtonText = "Start"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startView()
     }
 
+    private fun updateMainButtonTextUi(text: String) {
+        mainButtonText = text
+        updateMainButtonTextUi()
+    }
+
+    private fun updateMainButtonTextUi() {
+        mainBinding.buttonText = mainButtonText
+    }
+
     private fun startView() {
         val startBinding = ActivityStartBinding.inflate(layoutInflater)
         setContentView(startBinding.root)
-        startView = StartView(startBinding, 2)
+        startView = StartView(startBinding)
         startView.setOnclickListenerOnBtnStart {
             people = 1
             main()
@@ -40,7 +50,9 @@ class MainActivity : AppCompatActivity() {
     private fun main() {
         mainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mainBinding.root)
-        mainBinding.tvPeople.text = "참가자 $people"
+        updateMainButtonTextUi()
+        mainBinding.people = "참가자 $people"
+        updateTimerUi("0.00")
         initGoal()
         setButtonOnClickListener()
     }
@@ -49,8 +61,8 @@ class MainActivity : AppCompatActivity() {
         val endBinding = ActivityEndBinding.inflate(layoutInflater)
         setContentView(endBinding.root)
         val maxScore = scores.max()
-        endBinding.tvBiggestScore.text = maxScore.toString()
-        endBinding.tvEndPeople.text = "참가자 ${scores.indexOf(maxScore) + 1}"
+        endBinding.biggestScore = maxScore.toString()
+        endBinding.endPeople = "참가자 ${scores.indexOf(maxScore) + 1}"
         endBinding.btnRestart.setOnClickListener {
             scores.clear()
             startView()
@@ -73,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
                 1 -> {
                     start()
-                    mainBinding.btnCommand.text = "Stop"
+                    updateMainButtonTextUi("Stop")
                     stage++
                 }
 
@@ -87,7 +99,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initGoal() {
         goal = Random().nextInt(1001) / 100f
-        mainBinding.tvGoal.text = goal.toString()
+        mainBinding.goal = goal.toString()
     }
 
     private fun start() {
@@ -97,23 +109,26 @@ class MainActivity : AppCompatActivity() {
                 sec++
                 tempScore = (sec / 100)
                 if (isBlind) {
-                    mainBinding.tvTimer.text = "???"
+                    updateTimerUi("???")
                 } else {
-                    mainBinding.tvTimer.text = tempScore.toString()
+                    updateTimerUi(tempScore.toString())
                 }
             }
         }
     }
 
+    private fun updateTimerUi(text: String) {
+        mainBinding.timer = text
+    }
+
     private fun stop() {
         timerTask?.cancel()
-        mainBinding.btnCommand.text = "Next"
+        updateMainButtonTextUi("Next")
 
         val score = abs(goal - tempScore)
         scores.add(score)
 
-        val tvScore: TextView = findViewById(R.id.tv_score)
-        tvScore.text = "score: ${String.format("%.2f", score)}"
+        mainBinding.score = "score: ${String.format("%.2f", score)}"
     }
 
 }
