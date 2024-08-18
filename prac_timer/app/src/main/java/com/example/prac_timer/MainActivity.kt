@@ -11,8 +11,9 @@ import kotlin.concurrent.timer
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var startView: StartView
+    private lateinit var startBinding: ActivityStartBinding
     private lateinit var mainBinding: ActivityMainBinding
+    private lateinit var endBinding: ActivityEndBinding
 
     private var timerTask: Timer? = null
     private val scores: MutableList<Float> = mutableListOf()
@@ -20,63 +21,97 @@ class MainActivity : AppCompatActivity() {
     private var isBlind = true
     private var tempScore: Float = 0.0f
     private var goal: Float = 0.0f
+    private var stage = 1
 
-    private var mainButtonText = "Start"
+    // startView
+    private var totalPeople: Int = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startBinding = ActivityStartBinding.inflate(layoutInflater)
+        mainBinding = ActivityMainBinding.inflate(layoutInflater)
+        endBinding = ActivityEndBinding.inflate(layoutInflater)
+
+        // startView
+        setOnclickListenerOnBtnMinus()
+        setOnclickListenerOnBtnPlus()
+        setStartBtnOnclickListener()
+
+        // mainView
+        setButtonOnClickListener()
+
         startView()
     }
 
-    private fun updateMainButtonTextUi(text: String) {
-        mainButtonText = text
-        updateMainButtonTextUi()
-    }
-
-    private fun updateMainButtonTextUi() {
-        mainBinding.buttonText = mainButtonText
-    }
-
     private fun startView() {
-        val startBinding = ActivityStartBinding.inflate(layoutInflater)
         setContentView(startBinding.root)
-        startView = StartView(startBinding)
-        startView.setOnclickListenerOnBtnStart {
+        updateTotalPeopleUi()
+    }
+
+    // startView
+    private fun setStartBtnOnclickListener() {
+        startBinding.btnStart.setOnClickListener {
             people = 1
-            main()
+            mainView()
         }
     }
 
-    private fun main() {
-        mainBinding = ActivityMainBinding.inflate(layoutInflater)
+    private fun setOnclickListenerOnBtnMinus() {
+        startBinding.btnMinus.setOnClickListener {
+            minus()
+        }
+    }
+
+    private fun minus() {
+        if (totalPeople > 1) {
+            totalPeople--
+            updateTotalPeopleUi()
+        }
+    }
+
+    private fun setOnclickListenerOnBtnPlus() {
+        startBinding.btnPlus.setOnClickListener {
+            plus()
+        }
+    }
+
+    private fun plus() {
+        if (totalPeople < 99) {
+            totalPeople++
+            updateTotalPeopleUi()
+        }
+    }
+
+    private fun updateTotalPeopleUi() {
+        startBinding.totalPeople = totalPeople.toString()
+    }
+
+    // mainView
+    private fun mainView() {
         setContentView(mainBinding.root)
-        updateMainButtonTextUi()
+        initMainView()
+    }
+
+    private fun initMainView() {
+        updateMainButtonTextUi("Start")
+        mainBinding.score = ""
         mainBinding.people = "참가자 $people"
         updateTimerUi("0.00")
         initGoal()
-        setButtonOnClickListener()
+        stage = 1
     }
 
-    private fun endView() {
-        val endBinding = ActivityEndBinding.inflate(layoutInflater)
-        setContentView(endBinding.root)
-        val maxScore = scores.max()
-        endBinding.biggestScore = maxScore.toString()
-        endBinding.endPeople = "참가자 ${scores.indexOf(maxScore) + 1}"
-        endBinding.btnRestart.setOnClickListener {
-            scores.clear()
-            startView()
-        }
+    private fun updateMainButtonTextUi(text: String) {
+        mainBinding.buttonText = text
     }
 
     private fun setButtonOnClickListener() {
-        var stage = 1
         mainBinding.btnCommand.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (startView.isTotalPeopleBiggerThan(people)) {
+                    if (people < totalPeople) {
                         people++
-                        main()
+                        mainView()
                         stage++
                     } else {
                         endView()
@@ -131,4 +166,15 @@ class MainActivity : AppCompatActivity() {
         mainBinding.score = "score: ${String.format("%.2f", score)}"
     }
 
+    // endView
+    private fun endView() {
+        setContentView(endBinding.root)
+        val maxScore = scores.max()
+        endBinding.biggestScore = maxScore.toString()
+        endBinding.endPeople = "참가자 ${scores.indexOf(maxScore) + 1}"
+        endBinding.btnRestart.setOnClickListener {
+            scores.clear()
+            startView()
+        }
+    }
 }
