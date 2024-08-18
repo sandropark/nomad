@@ -2,6 +2,7 @@ package com.example.prac_timer
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.MutableLiveData
 import com.example.prac_timer.databinding.ActivityEndBinding
 import com.example.prac_timer.databinding.ActivityMainBinding
 import com.example.prac_timer.databinding.ActivityStartBinding
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private var stage = 1
 
     // startView
-    private var totalPeople: Int = 2
+    private val liveDataTotalPeople = MutableLiveData<Int>().apply { value = 2 }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +34,7 @@ class MainActivity : AppCompatActivity() {
         endBinding = ActivityEndBinding.inflate(layoutInflater)
 
         // startView
-        setOnclickListenerOnBtnMinus()
-        setOnclickListenerOnBtnPlus()
-        setStartBtnOnclickListener()
+        initStartView()
 
         // mainView
         setButtonOnClickListener()
@@ -43,9 +42,17 @@ class MainActivity : AppCompatActivity() {
         startView()
     }
 
+    private fun initStartView() {
+        setOnclickListenerOnBtnMinus()
+        setOnclickListenerOnBtnPlus()
+        setStartBtnOnclickListener()
+        liveDataTotalPeople.observe(this) {
+            startBinding.totalPeople = it.toString()
+        }
+    }
+
     private fun startView() {
         setContentView(startBinding.root)
-        updateTotalPeopleUi()
     }
 
     // startView
@@ -58,32 +65,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun setOnclickListenerOnBtnMinus() {
         startBinding.btnMinus.setOnClickListener {
-            minus()
-        }
-    }
-
-    private fun minus() {
-        if (totalPeople > 1) {
-            totalPeople--
-            updateTotalPeopleUi()
+            liveDataTotalPeople.value?.let { totalPeople ->
+                if (totalPeople > 1) {
+                    liveDataTotalPeople.value = totalPeople - 1
+                }
+            }
         }
     }
 
     private fun setOnclickListenerOnBtnPlus() {
         startBinding.btnPlus.setOnClickListener {
-            plus()
+            liveDataTotalPeople.value?.let { totalPeople ->
+                if (totalPeople < 99) {
+                    liveDataTotalPeople.value = totalPeople + 1
+                }
+            }
         }
-    }
-
-    private fun plus() {
-        if (totalPeople < 99) {
-            totalPeople++
-            updateTotalPeopleUi()
-        }
-    }
-
-    private fun updateTotalPeopleUi() {
-        startBinding.totalPeople = totalPeople.toString()
     }
 
     // mainView
@@ -109,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         mainBinding.btnCommand.setOnClickListener {
             when (stage % 3) {
                 0 -> {
-                    if (people < totalPeople) {
+                    if (people < liveDataTotalPeople.value!!) {
                         people++
                         mainView()
                         stage++
