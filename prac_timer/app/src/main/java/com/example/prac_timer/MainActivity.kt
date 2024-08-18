@@ -21,11 +21,22 @@ class MainActivity : AppCompatActivity() {
     private var people = 1
     private var isBlind = true
     private var tempScore: Float = 0.0f
-    private var goal: Float = 0.0f
+
     private var stage = 1
 
     // startView
     private val liveDataTotalPeople = MutableLiveData<Int>().apply { value = 2 }
+
+    // mainView
+    private val liveDataMainButton = MutableLiveData<String>().apply { value = "Start" }
+    private val liveDataScore = MutableLiveData<String>().apply { value = "" }
+    private val liveDataTimer = MutableLiveData<String>().apply { value = "0.00" }
+    private val liveDataPeople = MutableLiveData<String>()
+    private val liveDataGoal = MutableLiveData<Float>()
+
+    // endView
+    private val liveDataBiggestScore = MutableLiveData<Float>()
+    private val liveDataEndPeople = MutableLiveData<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,9 +48,24 @@ class MainActivity : AppCompatActivity() {
         initStartView()
 
         // mainView
-        setButtonOnClickListener()
+        setMainButtonOnClickListener()
+        liveDataMainButton.observe(this) { mainBinding.buttonText = it }
+        liveDataScore.observe(this) { mainBinding.score = it }
+        liveDataTimer.observe(this) { mainBinding.timer = it }
+        liveDataPeople.observe(this) { mainBinding.people = it }
+        liveDataGoal.observe(this) { mainBinding.goal = it.toString() }
+
+        // endView
+        liveDataBiggestScore.observe(this) { endBinding.biggestScore = it.toString() }
+        liveDataEndPeople.observe(this) { endBinding.endPeople = it }
+        setRestartBtnOnclickListener()
 
         startView()
+    }
+
+    // startView
+    private fun startView() {
+        setContentView(startBinding.root)
     }
 
     private fun initStartView() {
@@ -51,11 +77,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startView() {
-        setContentView(startBinding.root)
-    }
-
-    // startView
     private fun setStartBtnOnclickListener() {
         startBinding.btnStart.setOnClickListener {
             people = 1
@@ -86,23 +107,16 @@ class MainActivity : AppCompatActivity() {
     // mainView
     private fun mainView() {
         setContentView(mainBinding.root)
-        initMainView()
-    }
 
-    private fun initMainView() {
-        updateMainButtonTextUi("Start")
-        mainBinding.score = ""
-        mainBinding.people = "참가자 $people"
-        updateTimerUi("0.00")
-        initGoal()
+        liveDataMainButton.value = "Start"
+        liveDataPeople.value = "참가자 $people"
+        liveDataScore.value = ""
+        liveDataTimer.value = "0.00"
+        liveDataGoal.value = Random().nextInt(1001) / 100f
         stage = 1
     }
 
-    private fun updateMainButtonTextUi(text: String) {
-        mainBinding.buttonText = text
-    }
-
-    private fun setButtonOnClickListener() {
+    private fun setMainButtonOnClickListener() {
         mainBinding.btnCommand.setOnClickListener {
             when (stage % 3) {
                 0 -> {
@@ -117,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 
                 1 -> {
                     start()
-                    updateMainButtonTextUi("Stop")
+                    liveDataMainButton.value = "Stop"
                     stage++
                 }
 
@@ -129,11 +143,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initGoal() {
-        goal = Random().nextInt(1001) / 100f
-        mainBinding.goal = goal.toString()
-    }
-
     private fun start() {
         var sec = 0f
         timerTask = timer(period = 10) {
@@ -141,23 +150,19 @@ class MainActivity : AppCompatActivity() {
                 sec++
                 tempScore = (sec / 100)
                 if (isBlind) {
-                    updateTimerUi("???")
+                    liveDataTimer.value = "???"
                 } else {
-                    updateTimerUi(tempScore.toString())
+                    liveDataTimer.value = tempScore.toString()
                 }
             }
         }
     }
 
-    private fun updateTimerUi(text: String) {
-        mainBinding.timer = text
-    }
-
     private fun stop() {
         timerTask?.cancel()
-        updateMainButtonTextUi("Next")
+        liveDataMainButton.value = "Next"
 
-        val score = abs(goal - tempScore)
+        val score = abs(liveDataGoal.value!! - tempScore)
         scores.add(score)
 
         mainBinding.score = "score: ${String.format("%.2f", score)}"
@@ -167,8 +172,12 @@ class MainActivity : AppCompatActivity() {
     private fun endView() {
         setContentView(endBinding.root)
         val maxScore = scores.max()
-        endBinding.biggestScore = maxScore.toString()
-        endBinding.endPeople = "참가자 ${scores.indexOf(maxScore) + 1}"
+        liveDataBiggestScore.value = maxScore
+        liveDataEndPeople.value = "참가자 ${scores.indexOf(maxScore) + 1}"
+    }
+
+
+    private fun setRestartBtnOnclickListener() {
         endBinding.btnRestart.setOnClickListener {
             scores.clear()
             startView()
