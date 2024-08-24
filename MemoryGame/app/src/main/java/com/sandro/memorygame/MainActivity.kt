@@ -1,14 +1,19 @@
 package com.sandro.memorygame
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sandro.memorygame.models.BoardSize
-import com.sandro.memorygame.utils.DEFAULT_ICONS
+import com.sandro.memorygame.models.MemoryGame
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
     private lateinit var rvBoard: RecyclerView
     private lateinit var tvNumMoves: TextView
     private lateinit var tvNumPairs: TextView
@@ -23,10 +28,14 @@ class MainActivity : AppCompatActivity() {
         tvNumMoves = findViewById(R.id.tvNumMoves)
         tvNumPairs = findViewById(R.id.tvNumPairs)
 
-        val chosenImages = DEFAULT_ICONS.shuffled().take(boardSize.getNumPairs())
-        val randomizedImages = (chosenImages + chosenImages).shuffled()
-
-        rvBoard.adapter = MemoryBoardAdapter(this, boardSize, randomizedImages)
+        val memoryGame = MemoryGame(boardSize)
+        rvBoard.adapter =
+            MemoryBoardAdapter(this, boardSize, memoryGame.cards, object : MemoryBoardAdapter.CardClickListener {
+                override fun onCardClicked(position: Int) {
+//                    updateGameWithFlip(position)
+                    Log.i(TAG, "Card clicked $position")
+                }
+            })
         rvBoard.setHasFixedSize(true)
         rvBoard.layoutManager = GridLayoutManager(this, boardSize.getWidth())
     }
