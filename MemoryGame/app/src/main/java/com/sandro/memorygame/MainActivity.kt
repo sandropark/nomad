@@ -1,9 +1,11 @@
 package com.sandro.memorygame
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var memoryGame: MemoryGame
     private lateinit var adapter: MemoryBoardAdapter
-    private val boardSize = BoardSize.EASY
+    private var boardSize = BoardSize.EASY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +53,33 @@ class MainActivity : AppCompatActivity() {
                 else
                     setUpBoard()
             }
+
+            R.id.mi_newSize -> {
+                showNewSizeDialog()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showNewSizeDialog() {
+        val boardSizeView = LayoutInflater.from(this).inflate(R.layout.dialog_board_size, null)
+        val radioGroupSize = boardSizeView.findViewById<RadioGroup>(R.id.radioGroup)
+        // 기존 게임의 보드 크기에 따라 라디오 버튼을 선택
+        when (boardSize) {
+            BoardSize.EASY -> radioGroupSize.check(R.id.rbEasy)
+            BoardSize.MEDIUM -> radioGroupSize.check(R.id.rbMedium)
+            BoardSize.HARD -> radioGroupSize.check(R.id.rbHard)
+        }
+        // 다이얼로그를 표시하고 사용자가 선택한 새로운 보드 크기에 따라 보드를 설정
+        showAlertDialog("Choose new size", boardSizeView) {
+            boardSize = when (radioGroupSize.checkedRadioButtonId) {
+                R.id.rbEasy -> BoardSize.EASY
+                R.id.rbMedium -> BoardSize.MEDIUM
+                else -> BoardSize.HARD
+            }
+            setUpBoard()
+        }
     }
 
     private fun showAlertDialog(title: String, view: View?, positiveClickListener: View.OnClickListener) {
