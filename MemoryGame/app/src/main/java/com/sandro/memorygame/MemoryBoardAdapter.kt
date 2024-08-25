@@ -59,6 +59,16 @@ class MemoryBoardAdapter(
                 else R.drawable.ic_launcher_background
             )
 
+            // 카드의 짝이 맞은 경우
+            if (memoryCard.isMatched) {
+                // 투명도를 0.4로 설정
+                imageButton.alpha = .4f
+                // 배경색을 회색으로 설정
+                imageButton.backgroundTintList = context.getColorStateList(R.color.color_gray)
+                // 클릭할 수 없도록 설정
+                imageButton.isEnabled = false
+            }
+
             imageButton.setOnClickListener {
                 Log.i(TAG, "Clicked on position $position")
                 cardClickListener.onCardClicked(position)
