@@ -1,5 +1,6 @@
 package com.sandro.memorygame
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -15,8 +16,15 @@ import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
 import com.google.android.material.snackbar.Snackbar
 import com.sandro.memorygame.models.BoardSize
 import com.sandro.memorygame.models.MemoryGame
+import com.sandro.memorygame.utils.EXTRA_BOARD_SIZE
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val CREATE_REQUEST_CODE = 248
+    }
+
     private lateinit var clRoot: androidx.constraintlayout.widget.ConstraintLayout
     private lateinit var rvBoard: RecyclerView
     private lateinit var tvNumMoves: TextView
@@ -58,8 +66,28 @@ class MainActivity : AppCompatActivity() {
                 showNewSizeDialog()
                 return true
             }
+
+            R.id.mi_custom -> {
+                showCreationDialog()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showCreationDialog() {
+        val boardSizeView = LayoutInflater.from(this).inflate(R.layout.dialog_board_size, null)
+        val radioGroupSize = boardSizeView.findViewById<RadioGroup>(R.id.radioGroup)
+        showAlertDialog("Create your own memory Board", boardSizeView) {
+            val desireBoardSize = when (radioGroupSize.checkedRadioButtonId) {
+                R.id.rbEasy -> BoardSize.EASY
+                R.id.rbMedium -> BoardSize.MEDIUM
+                else -> BoardSize.HARD
+            }
+            val intent = Intent(this, CreateActivity::class.java)
+            intent.putExtra(EXTRA_BOARD_SIZE, desireBoardSize)
+            startActivityForResult(intent, CREATE_REQUEST_CODE)
+        }
     }
 
     private fun showNewSizeDialog() {
