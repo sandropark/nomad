@@ -5,6 +5,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
 import com.google.android.material.snackbar.Snackbar
 import com.sandro.memorygame.models.BoardSize
 import com.sandro.memorygame.models.MemoryGame
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
                 updateGameWithFlip(position)
             }
         })
+        tvNumPairs.setTextColor(resources.getColor(R.color.color_progress_none, null))
         rvBoard.adapter = adapter
         rvBoard.setHasFixedSize(true)
         rvBoard.layoutManager = GridLayoutManager(this, boardSize.getWidth())
@@ -49,6 +51,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (memoryGame.flipCard(position)) {
+            val color = ArgbEvaluator().evaluate(
+                memoryGame.numPairsFound.toFloat() / boardSize.getNumPairs(),
+                resources.getColor(R.color.color_progress_none, null),
+                resources.getColor(R.color.color_progress_full, null)
+            ) as Int
+            tvNumPairs.setTextColor(color)
             tvNumPairs.text = "Pairs: ${memoryGame.numPairsFound} / ${boardSize.getNumPairs()}"
             if (memoryGame.haveWonGame())
                 Snackbar.make(clRoot, "You won! Congratulations.", Snackbar.LENGTH_LONG).show()
