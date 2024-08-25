@@ -1,7 +1,11 @@
 package com.sandro.memorygame
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +33,56 @@ class MainActivity : AppCompatActivity() {
         tvNumMoves = findViewById(R.id.tvNumMoves)
         tvNumPairs = findViewById(R.id.tvNumPairs)
 
+        setUpBoard()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.mi_refresh -> {
+                if (memoryGame.getNumMoves() > 0 && !memoryGame.haveWonGame())
+                    showAlertDialog("Quit your current game?", null) {
+                        setUpBoard()
+                    }
+                else
+                    setUpBoard()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showAlertDialog(title: String, view: View?, positiveClickListener: View.OnClickListener) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(view)
+            .setMessage("Are you sure you want to quit your current game?")
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("OK") { _, _ ->
+                positiveClickListener.onClick(null)
+            }.show()
+    }
+
+    private fun setUpBoard() {
+        when (boardSize) {
+            BoardSize.EASY -> {
+                tvNumMoves.text = "Easy: 4 x 2"
+                tvNumPairs.text = "Pairs: 0 / 4"
+            }
+
+            BoardSize.MEDIUM -> {
+                tvNumMoves.text = "Medium: 6 x 3"
+                tvNumPairs.text = "Pairs: 0 / 9"
+            }
+
+            BoardSize.HARD -> {
+                tvNumMoves.text = "Hard: 6 x 4"
+                tvNumPairs.text = "Pairs: 0 / 12"
+            }
+        }
         memoryGame = MemoryGame(boardSize)
         adapter = MemoryBoardAdapter(this, boardSize, memoryGame.cards, object : MemoryBoardAdapter.CardClickListener {
             override fun onCardClicked(position: Int) {
