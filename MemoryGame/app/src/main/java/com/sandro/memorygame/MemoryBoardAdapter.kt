@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageButton
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.sandro.memorygame.MemoryBoardAdapter.ViewHolder
 import com.sandro.memorygame.models.BoardSize
@@ -58,17 +60,11 @@ class MemoryBoardAdapter(
                 if (memoryCard.isFaceUp) memoryCard.identifier
                 else R.drawable.ic_launcher_background
             )
-
-            // 카드의 짝이 맞은 경우
-            if (memoryCard.isMatched) {
-                // 투명도를 0.4로 설정
-                imageButton.alpha = .4f
-                // 배경색을 회색으로 설정
-                imageButton.backgroundTintList = context.getColorStateList(R.color.color_gray)
-                // 클릭할 수 없도록 설정
-                imageButton.isEnabled = false
-            }
-
+            imageButton.alpha = if (memoryCard.isMatched) .4f else 1f
+            val colorStateList =
+                if (memoryCard.isMatched) ContextCompat.getColorStateList(context, R.color.color_gray)
+                else null
+            ViewCompat.setBackgroundTintList(imageButton, colorStateList)
             imageButton.setOnClickListener {
                 Log.i(TAG, "Clicked on position $position")
                 cardClickListener.onCardClicked(position)
